@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria de Doca</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        :root { --azul-nadir: #1a4a7a; --laranja: #ff8c00; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; display: flex; justify-content: center; padding: 20px; }
+        
+        .form-card { 
+            width: 100%; max-width: 1200px; background: white; padding: 30px; 
+            border: 4px solid var(--azul-nadir); border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .header { 
+            display: grid; 
+            grid-template-columns: 100px 1fr 100px; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            padding-bottom: 15px; 
+            border-bottom: 2px solid #eee; 
+        }
+        .logo { font-size: 50px; font-weight: 900; color: #333; line-height: 1; }
+        .logo span { color: var(--laranja); }
+        .titulo { 
+            grid-column: 2; 
+            text-align: center; 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #333; 
+            text-transform: uppercase; 
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: var(--azul-nadir); color: white; padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-size: 13px; }
+        td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        
+        .doca-vermelha { color: red; font-weight: bold; }
+        .pdr-row { background-color: #ffff00 !important; font-weight: bold; }
+        
+        input, select { width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; }
+        .footer-text { margin-top: 20px; font-weight: bold; color: #444; }
+
+        .btn-group { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+        button { padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; color: white; }
+        .btn-limpar { background: #95a5a6; }
+        .btn-enviar { background: #27ae60; }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <div class="header">
+        <div class="logo">N<span>.</span></div>
+        <div class="titulo">AUDITORIA DE DOCA - <span id="data-atual"></span></div>
+    </div>
+
+    <form id="formAuditoria">
+        <table>
+            <thead>
+                <tr>
+                    <th>Docas</th>
+                    <th>Carros</th>
+                    <th>Horário</th>
+                    <th>Status</th>
+                    <th>Observação</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+
+        <p class="footer-text">PDR = PADRONIZAÇÃO</p>
+
+        <div class="btn-group">
+            <button type="reset" class="btn-limpar">Limpar</button>
+            <button type="submit" class="btn-enviar" id="btnAcao">Enviar Relatório</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function() { emailjs.init("aPEKFF6QbRnclt5n4"); })(); 
+
+    const dataHoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    document.getElementById('data-atual').innerText = dataHoje;
+
+    const docas = ["1", "2E", "2D", "3E", "3D", "4D", "4E", "4A", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "Bolsão 1", "Bolsão 2", "Bolsão 3", "Bolsão 4", "Bolsão 5", "Bolsão 6", "Bolsão 7", "Bolsão 8", "Bolsão 9"];
+
+    const tabela = document.getElementById('corpoTabela');
+    docas.forEach(d => {
+        const tr = document.createElement('tr');
+        const isRed = ["1", "2E", "2D", "3E", "3D", "4D", "4E", "4A"].includes(d);
+        
+        if(d === "27") {
+            tr.className = "pdr-row";
+            tr.innerHTML = `<td>27</td><td>PADRONIZAÇÃO</td><td>---</td><td>PADRONIZAÇÃO</td><td><input type="text" class="o-in" data-d="27"></td>`;
+        } else {
+            tr.innerHTML = `
+                <td class="${isRed ? 'doca-vermelha' : ''}">${d}</td>
+                <td><input type="text" class="c-in" data-d="${d}"></td>
+                <td><input type="time" class="h-in" data-d="${d}"></td>
+                <td>
+                    <select class="l-in" data-d="${d}">
+                        <option value="---">Selecione...</option>
+                        <option value="Disponível">Disponível</option>
+                        <option value="Carregando">Carregando</option>
+                        <option value="Aguardando">Aguardando</option>
+                        <option value="Devolução">Devolução</option>
+                        <option value="Sobra">Sobra</option>
+                        <option value="No Show">No Show</option>
+                        <option value="Reagendado">Reagendado</option>
+                        <option value="Avaria">Avaria</option>
+                    </select>
+                </td>
+                <td><input type="text" class="o-in" data-d="${d}"></td>`;
+        }
+        tabela.appendChild(tr);
+    });
+
+    document.getElementById('formAuditoria').onsubmit = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnAcao');
+        btn.innerText = "ENVIANDO...";
+
+        let layoutEmail = `
+            <div style="border: 4px solid #1a4a7a; padding: 20px; border-radius: 10px; font-family: Arial, sans-serif;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+                    <tr>
+                        <td width="50" style="font-size: 40px; font-weight: bold; color: #333;">N<span style="color: #ff8c00;">.</span></td>
+                        <td align="center" style="font-size: 22px; font-weight: bold; color: #333; text-transform: uppercase;">
+                            Auditoria de Doca - ${dataHoje}
+                        </td>
+                        <td width="50"></td>
+                    </tr>
+                </table>
+                <table border="1" style="border-collapse: collapse; width: 100%;">
+                    <thead>
+                        <tr style="background-color: #1a4a7a; color: white;">
+                            <th style="padding: 10px;">Doca</th>
+                            <th style="padding: 10px;">Carro</th>
+                            <th style="padding: 10px;">Horário</th>
+                            <th style="padding: 10px;">Status</th>
+                            <th style="padding: 10px;">Obs</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+        docas.forEach(d => {
+            let car, leg, hor, obs, style = "";
+            if(d === "27") {
+                car = "PADRONIZAÇÃO"; hor = "---"; leg = "PADRONIZAÇÃO"; obs = document.querySelector(`.o-in[data-d="27"]`).value || "";
+                style = 'style="background-color: #ffff00; font-weight: bold;"';
+            } else {
+                car = document.querySelector(`.c-in[data-d="${d}"]`).value || "---";
+                hor = document.querySelector(`.h-in[data-d="${d}"]`).value || "---";
+                leg = document.querySelector(`.l-in[data-d="${d}"]`).value;
+                obs = document.querySelector(`.o-in[data-d="${d}"]`).value || "---";
+            }
+            layoutEmail += `<tr ${style}><td align="center">${d}</td><td align="center">${car}</td><td align="center">${hor}</td><td align="center">${leg}</td><td align="center">${obs}</td></tr>`;
+        });
+
+        layoutEmail += `</tbody></table><p><b>PDR = PADRONIZAÇÃO</b></p></div>`;
+
+        emailjs.send("service_f8m5n8r", "template_4um45g4", { message: layoutEmail })
+        .then(() => { alert("Enviado com sucesso!"); btn.innerText = "Enviar Relatório"; }, () => { alert("Erro no envio!"); btn.innerText = "Enviar Relatório"; });
+    };
+</script>
+</body>
+</html>
